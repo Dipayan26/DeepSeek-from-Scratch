@@ -89,6 +89,12 @@ def prepare_tinystories_dataset():
 
 
 
+if __name__ == "__main__":
+    prepare_tinystories_dataset()
+
+
+
+'''
 
 # def prepare_tinystories_dataset():
 """Download and tokenize TinyStories dataset."""
@@ -173,6 +179,38 @@ print("You can now run: python main.py train")
 
 
 
+'''
+
+'''
+import numpy as np
+
+# We want total 10 numbers
+total_len = 10
+
+# Create memmap file (10 integers)
+arr = np.memmap("example.bin", dtype=np.int32, mode="w+", shape=(total_len,))
+
+# Write in batches
+batch1 = np.array([1, 2, 3])          # 3 numbers
+batch2 = np.array([4, 5, 6, 7])       # 4 numbers
+batch3 = np.array([8, 9, 10])         # 3 numbers
+
+idx = 0
+
+# Write batch1 → positions 0–2
+arr[idx:idx+len(batch1)] = batch1
+idx += len(batch1)
+
+# Write batch2 → positions 3–6
+arr[idx:idx+len(batch2)] = batch2
+idx += len(batch2)
+
+# Write batch3 → positions 7–9
+arr[idx:idx+len(batch3)] = batch3
+idx += len(batch3)
+
+# Save to disk
+arr.flush()'''
 
 
 
@@ -180,5 +218,4 @@ print("You can now run: python main.py train")
 
 
 
-# if __name__ == "__main__":
-#     prepare_tinystories_dataset()
+

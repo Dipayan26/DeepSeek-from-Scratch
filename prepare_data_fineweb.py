@@ -31,9 +31,17 @@ TRAIN_ON_CUSTOM_ROWS = True
 CUSTOM_ROW_COUNT = 800000 
 
 # Dataset Configuration
+# DATASET_OPTIONS = [
+#     ("HuggingFaceFW/fineweb-edu", "CC-MAIN-2024-51"),
+# ]
 DATASET_OPTIONS = [
-    ("HuggingFaceFW/fineweb-edu", "CC-MAIN-2024-51"),
+    ("tiny_shakespeare", None),
 ]
+
+# DATASET_OPTIONS = [
+#     ("tiny_shakespeare", None),
+# ]
+
 
 # Processing Parameters
 CONTEXT_LENGTH = 1024       
