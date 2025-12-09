@@ -12,6 +12,8 @@ import tiktoken
 from tqdm.auto import tqdm
 from datasets import load_dataset
 
+
+
 def prepare_tinystories_dataset():
     """Download and tokenize TinyStories dataset."""
     
@@ -38,6 +40,11 @@ def prepare_tinystories_dataset():
     
     # Load dataset
     ds = load_dataset("roneneldan/TinyStories")
+    # ds = load_dataset("tiny_shakespeare")
+    
+    ds['train'] = ds['train'].select(range(1000))
+    ds['validation'] = ds['validation'].select(range(200))
+
     
     # Initialize tokenizer
     enc = tiktoken.get_encoding("gpt2")
@@ -65,7 +72,8 @@ def prepare_tinystories_dataset():
         
         print(f"Creating {filename}...")
         arr = np.memmap(filename, dtype=dtype, mode='w+', shape=(arr_len,))
-        total_batches = 1024
+        # total_batches = 1024
+        total_batches = 50
         
         idx = 0
         for batch_idx in tqdm(range(total_batches), desc=f'Writing {filename}'):
@@ -94,92 +102,94 @@ if __name__ == "__main__":
 
 
 
-'''
 
-# def prepare_tinystories_dataset():
-"""Download and tokenize TinyStories dataset."""
+# # def prepare_tinystories_dataset():
+# """Download and tokenize TinyStories dataset."""
 
-print("=" * 60)
-print("PREPARING TINYSTORIES DATASET")
-print("=" * 60)
+# print("=" * 60)
+# print("PREPARING TINYSTORIES DATASET")
+# print("=" * 60)
 
-# Check if already prepared
-if os.path.exists("train.bin") and os.path.exists("validation.bin"):
-    print("✓ Dataset files already exist!")
+# # Check if already prepared
+# if os.path.exists("train.bin") and os.path.exists("validation.bin"):
+#     print("✓ Dataset files already exist!")
     
-    # Show file info
-    train_size = os.path.getsize("train.bin") / (1024 * 1024)
-    val_size = os.path.getsize("validation.bin") / (1024 * 1024)
+#     # Show file info
+#     train_size = os.path.getsize("train.bin") / (1024 * 1024)
+#     val_size = os.path.getsize("validation.bin") / (1024 * 1024)
     
-    train_data = np.memmap('train.bin', dtype=np.uint16, mode='r')
-    val_data = np.memmap('validation.bin', dtype=np.uint16, mode='r')
+#     train_data = np.memmap('train.bin', dtype=np.uint16, mode='r')
+#     val_data = np.memmap('validation.bin', dtype=np.uint16, mode='r')
     
-    print(f"├── train.bin: {len(train_data):,} tokens ({train_size:.1f} MB)")
-    print(f"└── validation.bin: {len(val_data):,} tokens ({val_size:.1f} MB)")
-    # return
+#     print(f"├── train.bin: {len(train_data):,} tokens ({train_size:.1f} MB)")
+#     print(f"└── validation.bin: {len(val_data):,} tokens ({val_size:.1f} MB)")
+#     # return
 
 
-print("Downloading TinyStories dataset...")
+# print("Downloading TinyStories dataset...")
 
-# Load dataset
-ds = load_dataset("roneneldan/TinyStories")
-ds['train'][0]
+# # Load dataset
+# ds = load_dataset("roneneldan/TinyStories")
+# ds['train']['text'][0]
 
-# Initialize tokenizer
-enc = tiktoken.get_encoding("gpt2")
+# # till 1000 for quick testing
+# ds['train'] = ds['train'].select(range(1000))
+# ds['validation'] = ds['validation'].select(range(200))
 
-def process_example(example):
-    """Tokenize text."""
-    import tiktoken
-    enc = tiktoken.get_encoding("gpt2")
-    ids = enc.encode_ordinary(example['text'])
-    return {'ids': ids, 'len': len(ids)}
 
-print("Tokenizing dataset...")
+# # Initialize tokenizer
+# enc = tiktoken.get_encoding("gpt2")
 
-# Tokenize
-tokenized = ds.map(
-    process_example,
-    remove_columns=['text'],
-    desc="Tokenizing splits",
-    num_proc=8,
-)
+# def process_example(example):
+#     """Tokenize text."""
+#     import tiktoken
+#     enc = tiktoken.get_encoding("gpt2")
+#     ids = enc.encode_ordinary(example['text'])
+#     return {'ids': ids, 'len': len(ids)}
 
-tokenized['train'][0]
+# print("Tokenizing dataset...")
 
-# Create binary files
-for split, dset in tokenized.items():
-    arr_len = np.sum(dset['len'], dtype=np.uint64)
-    filename = f'{split}.bin'
-    dtype = np.uint16  # GPT-2 vocab size < 2^16
+# # Tokenize
+# tokenized = ds.map(
+#     process_example,
+#     remove_columns=['text'],
+#     desc="Tokenizing splits",
+#     num_proc=8,
+# )
+
+# tokenized['train'][0]
+
+# # Create binary files
+# for split, dset in tokenized.items():
+#     arr_len = np.sum(dset['len'], dtype=np.uint64)
+#     filename = f'{split}.bin'
+#     dtype = np.uint16  # GPT-2 vocab size < 2^16
     
-    print(f"Creating {filename}...")
-    arr = np.memmap(filename, dtype=dtype, mode='w+', shape=(arr_len,))
-    total_batches = 1024
+#     print(f"Creating {filename}...")
+#     arr = np.memmap(filename, dtype=dtype, mode='w+', shape=(arr_len,))
+#     total_batches = 1024
     
-    idx = 0
-    for batch_idx in tqdm(range(total_batches), desc=f'Writing {filename}'):
-        batch = dset.shard(
-            num_shards=total_batches, 
-            index=batch_idx, 
-            contiguous=True
-        ).with_format('numpy')
+#     idx = 0
+#     for batch_idx in tqdm(range(total_batches), desc=f'Writing {filename}'):
+#         batch = dset.shard(
+#             num_shards=total_batches, 
+#             index=batch_idx, 
+#             contiguous=True
+#         ).with_format('numpy')
         
-        arr_batch = np.concatenate(batch['ids'])
-        arr[idx : idx + len(arr_batch)] = arr_batch
-        idx += len(arr_batch)
+#         arr_batch = np.concatenate(batch['ids'])
+#         arr[idx : idx + len(arr_batch)] = arr_batch
+#         idx += len(arr_batch)
     
-    arr.flush()
+#     arr.flush()
     
-    size_mb = os.path.getsize(filename) / (1024 * 1024)
-    print(f"✓ {filename}: {arr_len:,} tokens ({size_mb:.1f} MB)")
+#     size_mb = os.path.getsize(filename) / (1024 * 1024)
+#     print(f"✓ {filename}: {arr_len:,} tokens ({size_mb:.1f} MB)")
 
-print("\n Dataset preparation completed!")
-print("You can now run: python main.py train")
+# print("\n Dataset preparation completed!")
+# print("You can now run: python main.py train")
 
 
-
-'''
 
 '''
 import numpy as np

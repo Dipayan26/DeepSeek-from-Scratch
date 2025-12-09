@@ -15,13 +15,13 @@ def train_model():
     # Configuration
     config = DeepSeekConfig(
         vocab_size=50257,
-        block_size=1024,
-        n_layer=8,
-        n_head=8,
-        n_embd=512,
-        kv_lora_rank=128,
-        q_lora_rank=192,
-        n_experts=8,
+        block_size=128, #1024
+        n_layer=2,#8 # fewer layers
+        n_head=4, #8 # small number of heads
+        n_embd=256,#512 # smaller embedding size
+        kv_lora_rank=64, #128 # reduced LoRA rank
+        q_lora_rank=64, #128
+        n_experts=4, # fewer experts
         n_experts_per_token=2,
         mtp_num_heads=1,
         dropout=0.1
@@ -29,12 +29,12 @@ def train_model():
 
     # Training parameters
     learning_rate = 3e-4
-    max_iters = 20000
-    warmup_steps = 2000
-    min_lr = 1e-5
-    eval_iters = 1000
-    batch_size = 32
-    gradient_accumulation_steps = 8
+    max_iters = 1000 ## instead of 20000
+    warmup_steps = 100 # instead of 2000 # ~10% of max_iters
+    min_lr = 1e-4 # instead of 1e-5
+    eval_iters = 50 #1000 
+    batch_size = 16 #32 # smaller batch
+    gradient_accumulation_steps = 4 #8 # effective batch = 16 * 4 = 64 sequences
 
     # Device setup
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -42,6 +42,7 @@ def train_model():
     dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else 'float16'
     ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torch.float16}[dtype]
     ctx = nullcontext() if device_type == 'cpu' else torch.cuda.amp.autocast(dtype=ptdtype)
+    # ctx = nullcontext() if device_type == 'cpu' else torch.amp.autocast(dtype=ptdtype)
 
     # Initialize wandb
     wandb.init(
@@ -94,7 +95,8 @@ def train_model():
     # Training loop
     model.train()
     best_val_loss = float('inf')
-    scaler = torch.cuda.amp.GradScaler(enabled=(dtype == 'float16'))
+    # scaler = torch.cuda.amp.GradScaler(enabled=(dtype == 'float16'))
+    scaler = torch.amp.GradScaler(enabled=(dtype == 'float16'))
 
     for epoch in tqdm(range(max_iters)):
         # Evaluation

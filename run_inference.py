@@ -11,15 +11,28 @@ def generate_text(prompt, max_tokens=100, temperature=0.8, top_k=50):
     """Generate text from your prompt."""
     
     # Model configuration (same as training)
+    # config = DeepSeekConfig(
+    #     vocab_size=50257,
+    #     block_size=128,
+    #     n_layer=4,
+    #     n_head=4,
+    #     n_embd=256,
+    #     kv_lora_rank=64,
+    #     q_lora_rank=96,
+    #     n_experts=4,
+    #     n_experts_per_token=2,
+    #     mtp_num_heads=1,
+    #     dropout=0.1
+    # )
     config = DeepSeekConfig(
         vocab_size=50257,
-        block_size=128,
-        n_layer=4,
-        n_head=4,
-        n_embd=256,
-        kv_lora_rank=64,
-        q_lora_rank=96,
-        n_experts=4,
+        block_size=128, #1024
+        n_layer=2,#8 # fewer layers
+        n_head=4, #8 # small number of heads
+        n_embd=256,#512 # smaller embedding size
+        kv_lora_rank=64, #128 # reduced LoRA rank
+        q_lora_rank=64, #128
+        n_experts=4, # fewer experts
         n_experts_per_token=2,
         mtp_num_heads=1,
         dropout=0.1

@@ -1,7 +1,23 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from models.config import DeepSeekConfig
 from .layers import SwiGLU
+#-----------------------------------------
+# class SwiGLU(nn.Module):
+#     def __init__(self, in_features, hidden_features, out_features, bias=True):
+#         super().__init__()
+#         self.gate_proj = nn.Linear(in_features, hidden_features, bias=bias)
+#         self.up_proj = nn.Linear(in_features, hidden_features, bias=bias)
+#         self.down_proj = nn.Linear(hidden_features, out_features, bias=bias)
+
+#     def forward(self, x):
+#         gate = self.gate_proj(x)
+#         up = self.up_proj(x)
+#         return self.down_proj(F.silu(gate) * up)
+    
+#-----------------------------------------
 
 class MoELayer(nn.Module):
     def __init__(self, config):
@@ -83,4 +99,13 @@ class MoELayer(nn.Module):
                     else:
                         self.expert_bias[i] += self.bias_update_rate
 
-        return output.view(batch_size, seq_len, hidden_size)
+        return output.view(batch_size, seq_len, hidden_size), top_k_indices
+
+
+
+
+# #demo data check code
+# a = MoELayer(DeepSeekConfig())
+# b = torch.randn(2, 4, 384)
+# c, top_k_indices = a(b)
+# print(c.shape)  # Expected output: torch.Size([2, 4, 384])
