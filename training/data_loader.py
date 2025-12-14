@@ -3,9 +3,11 @@ import numpy as np
 
 def get_batch(split, config, batch_size, device_type, device):
     if split == 'train':
-        data = np.memmap('train.bin', dtype=np.uint16, mode='r')
+        # data = np.memmap('train.bin', dtype=np.uint16, mode='r')
+        data = np.memmap('train_prot.bin', dtype=np.uint16, mode='r')
     else:
-        data = np.memmap('validation.bin', dtype=np.uint16, mode='r')
+        # data = np.memmap('validation.bin', dtype=np.uint16, mode='r')
+        data = np.memmap('validation_prot.bin', dtype=np.uint16, mode='r')
 
     ix = torch.randint(len(data) - config.block_size, (batch_size,))
     x = torch.stack([torch.from_numpy((data[i:i+config.block_size]).astype(np.int64)) for i in ix])
@@ -32,3 +34,8 @@ def estimate_loss(model, config, eval_iters, batch_size, device_type, device, ct
             out[split] = losses.mean()
     model.train()
     return out
+
+
+
+
+

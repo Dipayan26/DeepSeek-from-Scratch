@@ -99,7 +99,7 @@ class MoELayer(nn.Module):
                     else:
                         self.expert_bias[i] += self.bias_update_rate
 
-        return output.view(batch_size, seq_len, hidden_size), top_k_indices
+        return output.view(batch_size, seq_len, hidden_size)
 
 
 

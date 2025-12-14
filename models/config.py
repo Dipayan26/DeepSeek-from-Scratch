@@ -47,8 +47,8 @@ class DeepSeekConfig:
     # MoE configuration
     n_experts: int = 4
     n_experts_per_token: int = 2
-    expert_intermediate_size: int = 128 #512
-    shared_expert_intermediate_size: int = 256 #768
+    expert_intermediate_size: int = 512 #512 ->128->512
+    shared_expert_intermediate_size: int = 768 #768 - >256
     use_shared_expert: bool = True
 
     # MTP configuration

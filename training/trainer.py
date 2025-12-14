@@ -14,27 +14,27 @@ load_dotenv()
 def train_model():
     # Configuration
     config = DeepSeekConfig(
-        vocab_size=50257,
-        block_size=128, #1024
-        n_layer=2,#8 # fewer layers
-        n_head=4, #8 # small number of heads
+        vocab_size=33, ## 50257 for deep seek 
+        block_size=1024, #1024 ==> 128 ==>1024
+        n_layer=12,#8->2->12 # fewer layers
+        n_head=8, #8 # small number of heads
         n_embd=256,#512 # smaller embedding size
         kv_lora_rank=64, #128 # reduced LoRA rank
         q_lora_rank=64, #128
         n_experts=4, # fewer experts
         n_experts_per_token=2,
-        mtp_num_heads=1,
+        mtp_num_heads=2, #1->2
         dropout=0.1
     )
 
     # Training parameters
-    learning_rate = 3e-4
-    max_iters = 1000 ## instead of 20000
-    warmup_steps = 100 # instead of 2000 # ~10% of max_iters
-    min_lr = 1e-4 # instead of 1e-5
-    eval_iters = 50 #1000 
-    batch_size = 16 #32 # smaller batch
-    gradient_accumulation_steps = 4 #8 # effective batch = 16 * 4 = 64 sequences
+    learning_rate = 2e-4 #-> 3e-4 ->2e-4 
+    max_iters = 20000 ## instead of 20000 ->1000->20000
+    warmup_steps = 1000 # instead of 2000 # ~10% of max_iters ->100->1000
+    min_lr = 2e-5 # instead of 1e-5 ->1e-4 -> 2e-5
+    eval_iters = 200 #1000 ->50->200
+    batch_size = 4 #32 # smaller batch ->16->4
+    gradient_accumulation_steps = 16 #8 # effective batch = 16 * 4 = 64 sequences ->4 
 
     # Device setup
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -46,7 +46,7 @@ def train_model():
 
     # Initialize wandb
     wandb.init(
-        project="deepseek-v3-training",
+        project="deepseek-v3-training_prot",
         config={
             "learning_rate": learning_rate,
             "max_iters": max_iters,
@@ -114,7 +114,8 @@ def train_model():
 
             if losses['val'] < best_val_loss:
                 best_val_loss = losses['val']
-                torch.save(model.state_dict(), "best_deepseek_v3.pt")
+                # torch.save(model.state_dict(), "best_deepseek_v3.pt")
+                torch.save(model.state_dict(), "best_deepseek_prot_v3.pt")
                 
                 # Log best model save to wandb
                 wandb.log({"best_val_loss_updated": best_val_loss})

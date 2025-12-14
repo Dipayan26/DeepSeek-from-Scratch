@@ -13,6 +13,7 @@ myenv/
 best_deepseek_v3.pt
 *.pt
 *.pth
+# *.fasta
 
 # Weights & Biases
 wandb/
