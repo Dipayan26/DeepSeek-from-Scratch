@@ -15,10 +15,10 @@ def train_model():
     # Configuration
     config = DeepSeekConfig(
         vocab_size=50257,
-        block_size=1024,
-        n_layer=8,
-        n_head=8,
-        n_embd=512,
+        block_size=512,
+        n_layer=4,
+        n_head=4,
+        n_embd=128,
         kv_lora_rank=128,
         q_lora_rank=192,
         n_experts=8,
